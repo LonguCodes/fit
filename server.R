@@ -27,7 +27,7 @@ coef <- 3.6
 mydata<- reactive({
 x<-req(input$file)
 
-data_f <- readFitFile("Running_2022-02-03T11_50_54.fit")
+data_f <- readFitFile(input$file$datapath)
 
 e <- records(data_f) %>% 
   bind_rows() %>% 
