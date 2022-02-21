@@ -1,6 +1,9 @@
 library(FITfileR)
 library(leaflet)
 library(dplyr)
+library(stringr)
+
+
 
 data_f <- readFitFile("Running_2022-02-03T11_50_54.fit")
 
@@ -10,17 +13,43 @@ e <- records(data_f) %>%
 
 e_df<-as.data.frame(e)
 
-coords <- e %>% 
-  select(position_long, position_lat)
+cols<-colnames(e_df)
+lo<-str_detect(colnames(e_df), "long")
+la<-str_detect(colnames(e_df), "lat")
+ti<-str_detect(colnames(e_df), "time")
+
+coords <- e_df %>% 
+  select(cols[lo], cols[la])
 
 
 m <- coords %>% 
   as.matrix() %>%
   leaflet(  ) %>%
   addTiles() %>%
-  addPolylines( )
-    
+  addPolylines( )    
 m
+
+
+all<-rep(TRUE,length(cols))
+
+sel<-as.logical(all-ti-lo-la)
+
+sel_v<-which(sel)
+
+len<-length(sel_v)
+
+par(mfrow=c(len,1),mar = c(4,4,0.1,0.1))
+for (i in sel_v[1:(length(sel_v)-1)]){
+plot(e_df[ti],e_df[,i],xlab="",ylab=cols[i],t="l",lwd=2)
+}
+plot(e_df[ti],e_df[,sel_v[len]],xlab="Time",ylab=cols[sel_v[len]],t="l",lwd=2)
+
+
+par(mfrow=c(2,ceiling(len/2)),mar = c(0.6,2,2,1))
+for (i in sel_v[1:(length(sel_v)-1)]){
+boxplot(e_df[,i],main=cols[i],cex.axis=1.2)
+}
+boxplot(e_df[,sel_v[len]],main=cols[sel_v[len]],cex.axis=1.2)
 
 
 

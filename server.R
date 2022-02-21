@@ -39,6 +39,28 @@ e_df
 
 }) #mydata
 
+###map
+output$mymap <- renderLeaflet({
+
+e_df<-mydata()
+
+cols<-colnames(e_df)
+lo<-str_detect(colnames(e_df), "long")
+la<-str_detect(colnames(e_df), "lat")
+
+coords <- e_df %>% 
+  select(cols[lo], cols[la])
+
+m <- coords %>% 
+  as.matrix() %>%
+  leaflet(  ) %>%
+  addTiles() %>%
+  addPolylines( )    
+m
+
+
+})
+
 output$Fit_plot <- renderPlot({
 
 e_df<-mydata()
@@ -48,7 +70,11 @@ lo<-str_detect(colnames(e_df), "long")
 la<-str_detect(colnames(e_df), "lat")
 ti<-str_detect(colnames(e_df), "time")
 
-#if (input$kmh==TRUE)
+if (input$kmh==TRUE)
+{
+sp<-str_detect(colnames(e_df), "speed")
+e_df[sp]<-e_df[sp]*3.6
+}
 
 all<-rep(TRUE,length(cols))
 sel<-as.logical(all-ti-lo-la)
@@ -57,18 +83,44 @@ len<-length(sel_v)
 
 par(mfrow=c(len,1),mar = c(4,4,0.1,0))
 for (i in sel_v[1:(length(sel_v)-1)]){
-plot(e_df[ti],e_df[,i],xlab="",ylab=cols[i],t="l",lwd=2)
+plot(e_df[ti],e_df[,i],xlab="",ylab=cols[i],t="l",lwd=2,cex.lab=1.4)
 }
-plot(e_df[ti],e_df[,sel_v[len]],xlab="Time",ylab=cols[sel_v[len]],t="l",lwd=2)
-
-
-
+plot(e_df[ti],e_df[,sel_v[len]],xlab="Time",ylab=cols[sel_v[len]],t="l",lwd=2,cex.lab=1.4)
 
 })
 
-#output$verb <- renderPrint({ mydata() })
+#output$verb <- renderPrint({ summary(mydata()) })
 
 #output$Fit_table <- renderTable({mydata()},digits = 4)
+
+
+output$Box_plot <- renderPlot({
+
+e_df<-mydata()
+
+cols<-colnames(e_df)
+lo<-str_detect(colnames(e_df), "long")
+la<-str_detect(colnames(e_df), "lat")
+ti<-str_detect(colnames(e_df), "time")
+
+if (input$kmh==TRUE)
+{
+sp<-str_detect(colnames(e_df), "speed")
+e_df[sp]<-e_df[sp]*3.6
+}
+
+all<-rep(TRUE,length(cols))
+sel<-as.logical(all-ti-lo-la)
+sel_v<-which(sel)
+len<-length(sel_v)
+
+par(mfrow=c(2,ceiling(len/2)),mar = c(0.6,2,2,1))
+for (i in sel_v[1:(length(sel_v)-1)]){
+boxplot(e_df[,i],main=cols[i],cex.axis=1.2)
+}
+boxplot(e_df[,sel_v[len]],main=cols[sel_v[len]],cex.axis=1.2)
+
+})
 
 
 output$downloadData <- downloadHandler(
@@ -83,8 +135,6 @@ output$downloadData <- downloadHandler(
 
 
 }
-
-
 
 
 

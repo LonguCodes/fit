@@ -31,9 +31,13 @@ ui <- fluidPage(
     # Main panel for displaying outputs ----
     mainPanel(
 
-      
+      leafletOutput("mymap",width = "100%", height = "800px"),
+	hr(),
       plotOutput("Fit_plot",width = "100%", height = "800px"),
-	#verbatimTextOutput("verb"),
+	hr(),
+	plotOutput("Box_plot",width = "100%", height = "800px"),
+	hr(),
+#	verbatimTextOutput("verb"),
       #tableOutput("Fit_table")
 
     )
