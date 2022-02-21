@@ -10,6 +10,7 @@
 
 library(shinymanager)
 library(shiny)
+library(leaflet)
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
