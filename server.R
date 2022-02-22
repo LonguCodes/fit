@@ -124,6 +124,7 @@ lo<-str_detect(colnames(e_df), "long")
 la<-str_detect(colnames(e_df), "lat")
 ti<-str_detect(colnames(e_df), "time")
 sp<-str_detect(colnames(e_df), "speed")
+di<-str_detect(colnames(e_df), "dist")
 
 if (sum(sp)==0){
 len<-length(e_df[,ti])
@@ -138,6 +139,7 @@ la<-str_detect(colnames(e_df), "lat")
 ti<-str_detect(colnames(e_df), "time")
 di<-str_detect(colnames(e_df), "dist")
 sp<-str_detect(colnames(e_df), "speed")
+di<-str_detect(colnames(e_df), "dist")
 }
 
 
@@ -174,6 +176,7 @@ lo<-str_detect(colnames(e_df), "long")
 la<-str_detect(colnames(e_df), "lat")
 ti<-str_detect(colnames(e_df), "time")
 sp<-str_detect(colnames(e_df), "speed")
+di<-str_detect(colnames(e_df), "dist")
 
 if (sum(sp)==0){
 len<-length(e_df[,ti])
@@ -188,6 +191,7 @@ la<-str_detect(colnames(e_df), "lat")
 ti<-str_detect(colnames(e_df), "time")
 di<-str_detect(colnames(e_df), "dist")
 sp<-str_detect(colnames(e_df), "speed")
+di<-str_detect(colnames(e_df), "dist")
 }
 
 

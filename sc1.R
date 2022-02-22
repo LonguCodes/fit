@@ -22,7 +22,7 @@ cols<-colnames(e_df)
 lo<-str_detect(colnames(e_df), "long")
 la<-str_detect(colnames(e_df), "lat")
 ti<-str_detect(colnames(e_df), "time")
-
+di<-str_detect(colnames(e_df), "dist")
 coords <- e_df %>% 
   select(cols[lo], cols[la])
 
@@ -35,6 +35,8 @@ m <- coords %>%
 m
 
 ti<-str_detect(colnames(e_df), "time")
+di<-str_detect(colnames(e_df), "dist")
+
 k<-dim(e_df)[2]
 for (i in 1:k){
 if (ti[i]==FALSE){
@@ -44,8 +46,17 @@ e_df[,i]<-(approxfun(1:length(e_df[,i]),e_df[,i])(1:length(e_df[,i])))
 }
 
 len<-length(e_df[,ti])
-lenspeed<-rep(NA,len)
+speed<-rep(NA,len)
 speed[2:len]<-e_df[2:(len),ti]-e_df[1:(len-1),ti]
+speed[speed==0]<-NA
+speed[2:len]<-e_df[2:(len),di]-e_df[1:(len-1),di]
+e_df$speed<-speed
+cols<-colnames(e_df)
+lo<-str_detect(colnames(e_df), "long")
+la<-str_detect(colnames(e_df), "lat")
+ti<-str_detect(colnames(e_df), "time")
+di<-str_detect(colnames(e_df), "dist")
+
 
 
 all<-rep(TRUE,length(cols))
