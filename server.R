@@ -1,3 +1,5 @@
+options(shiny.maxRequestSize=30*1024^2)
+
 
 #credentials <- data.frame(
 #  user = c("ankieta"), # mandatory
@@ -14,6 +16,8 @@ library(dplyr)
 library(tools)
 library(stringr)
 library(openxlsx)
+library(trackeR)
+
 
 server <- function(input, output) {
 
@@ -25,8 +29,12 @@ coef <- 3.6
 #output$verb <- renderPrint({ mydata() })
 
 mydata<- reactive({
-x<-req(input$file)
 
+x<-req(input$file)
+x<-x$name
+ext<-strsplit(x, split="\\.")[[1]][length(strsplit(x, split="\\.")[[1]])]
+
+if (tolower(ext)=="fit"){
 data_f <- readFitFile(input$file$datapath)
 
 e <- records(data_f) %>% 
@@ -34,10 +42,56 @@ e <- records(data_f) %>%
   arrange(timestamp) 
 
 e_df<-as.data.frame(e)
+} # od fit
+
+if (tolower(ext)=="fit"){
+data_f <- readFitFile(input$file$datapath)
+
+e <- records(data_f) %>% 
+  bind_rows() %>% 
+  arrange(timestamp) 
+
+e_df<-as.data.frame(e)
+} # od fit
+
+
+if (tolower(ext)=="tcx"){
+e <- readTCX(input$file$datapath)
+
+e_df<-e[colSums(!is.na(e)) > 0.1*length(e[,1])]
+
+ti<-str_detect(colnames(e_df), "time")
+k<-dim(e_df)[2]
+
+for (i in 1:k){
+	if (ti[i]==FALSE){
+		e_df[,i]<-(approxfun(1:length(e_df[,i]),e_df[,i])(1:length(e_df[,i])))
+	}
+}
+} # od tcx
+
+if (tolower(ext)=="gpx"){
+e <- readGPX(input$file$datapath)
+
+e_df<-e[colSums(!is.na(e)) > 0.1*length(e[,1])]
+
+ti<-str_detect(colnames(e_df), "time")
+k<-dim(e_df)[2]
+
+for (i in 1:k){
+	if (ti[i]==FALSE){
+		e_df[,i]<-(approxfun(1:length(e_df[,i]),e_df[,i])(1:length(e_df[,i])))
+	}
+}
+} # od gpx
+
+
 
 e_df
 
 }) #mydata
+
+
 
 ###map
 output$mymap <- renderLeaflet({
@@ -69,10 +123,27 @@ cols<-colnames(e_df)
 lo<-str_detect(colnames(e_df), "long")
 la<-str_detect(colnames(e_df), "lat")
 ti<-str_detect(colnames(e_df), "time")
+sp<-str_detect(colnames(e_df), "speed")
+
+if (sum(sp)==0){
+len<-length(e_df[,ti])
+speed<-rep(NA,len)
+speed[2:len]<-e_df[2:(len),ti]-e_df[1:(len-1),ti]
+speed[speed==0]<-NA
+speed[2:len]<-e_df[2:(len),di]-e_df[1:(len-1),di]
+e_df$speed<-speed
+cols<-colnames(e_df)
+lo<-str_detect(colnames(e_df), "long")
+la<-str_detect(colnames(e_df), "lat")
+ti<-str_detect(colnames(e_df), "time")
+di<-str_detect(colnames(e_df), "dist")
+sp<-str_detect(colnames(e_df), "speed")
+}
+
+
 
 if (input$kmh==TRUE)
 {
-sp<-str_detect(colnames(e_df), "speed")
 e_df[sp]<-e_df[sp]*3.6
 }
 
@@ -102,10 +173,26 @@ cols<-colnames(e_df)
 lo<-str_detect(colnames(e_df), "long")
 la<-str_detect(colnames(e_df), "lat")
 ti<-str_detect(colnames(e_df), "time")
+sp<-str_detect(colnames(e_df), "speed")
+
+if (sum(sp)==0){
+len<-length(e_df[,ti])
+speed<-rep(NA,len)
+speed[2:len]<-e_df[2:(len),ti]-e_df[1:(len-1),ti]
+speed[speed==0]<-NA
+speed[2:len]<-e_df[2:(len),di]-e_df[1:(len-1),di]
+e_df$speed<-speed
+cols<-colnames(e_df)
+lo<-str_detect(colnames(e_df), "long")
+la<-str_detect(colnames(e_df), "lat")
+ti<-str_detect(colnames(e_df), "time")
+di<-str_detect(colnames(e_df), "dist")
+sp<-str_detect(colnames(e_df), "speed")
+}
+
 
 if (input$kmh==TRUE)
 {
-sp<-str_detect(colnames(e_df), "speed")
 e_df[sp]<-e_df[sp]*3.6
 }
 

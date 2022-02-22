@@ -2,16 +2,21 @@ library(FITfileR)
 library(leaflet)
 library(dplyr)
 library(stringr)
+library(trackeR)
 
 
+#data_f <- readFitFile("Running_2022-02-03T11_50_54.fit")
 
-data_f <- readFitFile("Running_2022-02-03T11_50_54.fit")
+#e <- records(data_f) %>% 
+#  bind_rows() %>% 
+#  arrange(timestamp) 
 
-e <- records(data_f) %>% 
-  bind_rows() %>% 
-  arrange(timestamp) 
+e_df<-df[colSums(!is.na(df)) > 0.9]
 
-e_df<-as.data.frame(e)
+
+e<-readGPX("suuntoapp-Running-2022-02-04T12-33-32Z-track.gpx")
+
+e_df<-e[colSums(!is.na(e)) > 0.1*length(e[,1])]
 
 cols<-colnames(e_df)
 lo<-str_detect(colnames(e_df), "long")
@@ -28,6 +33,19 @@ m <- coords %>%
   addTiles() %>%
   addPolylines( )    
 m
+
+ti<-str_detect(colnames(e_df), "time")
+k<-dim(e_df)[2]
+for (i in 1:k){
+if (ti[i]==FALSE){
+e_df[,i]<-(approxfun(1:length(e_df[,i]),e_df[,i])(1:length(e_df[,i])))
+
+}
+}
+
+len<-length(e_df[,ti])
+lenspeed<-rep(NA,len)
+speed[2:len]<-e_df[2:(len),ti]-e_df[1:(len-1),ti]
 
 
 all<-rep(TRUE,length(cols))
