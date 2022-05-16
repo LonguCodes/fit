@@ -1,34 +1,49 @@
 
-#credentials <- data.frame(
-#  user = c("ankieta"), # mandatory
-#  password = c("ankieta2021"), # mandatory 
-#  admin = c(TRUE),
-#  comment = "Simple and secure authentification mechanism 
-#  for single ‘Shiny’ applications.",
-#  stringsAsFactors = FALSE 
-#)
-
+library(shinyauthr)
 library(shinymanager)
 library(shiny)
 library(leaflet)
+
+
+user_base <- data.frame(
+  user = c("ankieta"), # mandatory
+  password = c("ankieta2021"), # mandatory 
+  admin = c(TRUE),
+  comment = "Simple and secure authentification mechanism 
+  for single ‘Shiny’ applications.",
+  stringsAsFactors = FALSE 
+)
+
+
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
 
   # App title ----
   titlePanel("Fit!"),
+  
+ 
 
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
+    
 
     # Sidebar panel for inputs ----
     sidebarPanel(
 
-	fileInput("file", h3("Data file input")),
-	#div(style="display: inline-block;vertical-align:top; width: 33%;", textInput("C","Enter C", "0.1")),
-	div(style="display: inline-block;vertical-align:top; width: 16%;",    checkboxInput('kmh','km/h',FALSE),),
-	downloadButton("downloadData", "Download"),
-    ),
+      # logout button
+      div(class = "pull-right", shinyauthr::logoutUI(id = "logout")),
+      
+      # login section
+      shinyauthr::loginUI(id = "login"),
+      
+      
+      uiOutput('fileInput'),
+      uiOutput('div'),
+      # Sidebar to show user info after login
+      uiOutput("sidebarpanel"), 
+      
+	  ),
     # Main panel for displaying outputs ----
     mainPanel(
 
@@ -38,6 +53,8 @@ ui <- fluidPage(
 	hr(),
 	plotOutput("Box_plot",width = "100%", height = "800px"),
 	hr(),
+	
+	
 #	verbatimTextOutput("verb"),
       #tableOutput("Fit_table")
 
